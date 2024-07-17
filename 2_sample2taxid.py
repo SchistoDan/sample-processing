@@ -74,7 +74,7 @@ def main(input_file, output_file):
             writer.writerow(row)
 
 #write unique TaxIDs to a separate file
-    input_filename = Path(input_file).stem  # Get the filename without extension
+    input_filename = Path(input_file).stem  #get the filename without extension
     unique_taxids_file = f"{input_filename}_unique_taxids.txt"
     with open(unique_taxids_file, 'w') as unique_file:
         for taxid in unique_taxids:
@@ -84,7 +84,7 @@ def main(input_file, output_file):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python 2_sample2taxid.py path/to/BOLD_output.csv sample2taxid.csv")
+        print("Usage: python 2_sample2taxid.py path/to/BOLD_output.csv output.csv")
     else:
         main(sys.argv[1], sys.argv[2])
 
