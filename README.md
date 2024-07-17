@@ -5,10 +5,13 @@ Takes path to directory containing raw reads (.fq.gz) and populates .csv with sa
 
 **usage: python 1_folder2csv_trim.py [/path/to/dir/raw_seqs.fq.gz]**
 - **/path/to/dir/raw_seqs.fq.gz** = path to parent directory containing raw reads in .fq.gz format.
+**output**
+- **[trimmed_parent_dir_name]_read_paths.csv**
 
 
 ## 2_sample2taxid.py
 Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on morphological identification (Phylum, class, Order, Family, Subfamily, Tribe, Genus, Species, Subspecies), grabs taxonomic ID (taxid) using NCBI Entrez API, determines taxonomic rank of taxid (matched_rank), and parses taxid and matched_rank to .csv
 
 **usage: python 2_sample2taxid.py [path/to/BOLD_output.csv] [sample2taxid.csv]**
-- **path/to/BOLD_output.csv** = 
+- **path/to/BOLD_output.csv** = path to directory containing sample taxonomy information downloaded from BOLD (must specify filename)
+- **sample2taxid.csv** = 
