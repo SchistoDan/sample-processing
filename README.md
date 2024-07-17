@@ -5,6 +5,7 @@ Takes path to directory containing raw reads (.fq.gz) and populates .csv with sa
 
 **usage: python 1_folder2csv_trim.py [/path/to/dir/raw_seqs.fq.gz]**
 - **/path/to/dir/raw_seqs.fq.gz** = path to parent directory containing raw reads in .fq.gz format.
+  
 **output**
 - **[trimmed_parent_dir_name]_read_paths.csv**
 
