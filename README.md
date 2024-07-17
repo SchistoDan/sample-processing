@@ -23,7 +23,7 @@ Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on
 - **output.csv** = name of .csv file containing desired fields.
 
 | Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank |
-| --------- | --------- |--------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
+| --------- | --------- |--------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
 | BGE_0001_A01  | Arthropoda | Insecta | Trichoptera | Apataniidae | Apataniinae | | Apatania | Apatania stylata | | 177658 | genus |
 | BGE_0001_A02 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus iridipennis | | 177627 | genus |
 | BGE_0001_A03 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus incertulus | | 3084599 | species |
