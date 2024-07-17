@@ -8,6 +8,7 @@ Takes path to directory containing raw reads (.fq.gz) and populates .csv with sa
   
 **output**
 - **[trimmed_parent_dir_name]_read_paths.csv**
+
 | ID  | forward | reverse |
 | --------- | --------- |---------|
 | BGE_0001_A01  | /path/to/R1.fq.gz  | path/to/R2.fq.gz |
