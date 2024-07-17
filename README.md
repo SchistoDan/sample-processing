@@ -10,14 +10,20 @@ Takes path to directory containing raw reads (.fq.gz) and populates .csv with sa
 - **[trimmed_parent_dir_name]_read_paths.csv**
 
 | ID  | forward | reverse |
-| --------- | --------- |---------|
-| BGE_0001_A01  | /path/to/R1.fq.gz  | path/to/R2.fq.gz |
+| --------- | --------- | --------- |
+| BGE_0001_A01  | path/to/R1.fq.gz  | path/to/R2.fq.gz |
 | BGE_0001_A02 | path/to/R1.fq.gz  | path/to/R2.fq.gz |
 | BGE_0001_A03 | path/to/R1.fq.gz | path/to/R2.fq.gz |
 
 ## 2_sample2taxid.py
-Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on morphological identification (Phylum, class, Order, Family, Subfamily, Tribe, Genus, Species, Subspecies), grabs taxonomic ID (taxid) using NCBI Entrez API, determines taxonomic rank of taxid (matched_rank), and parses taxid and matched_rank to .csv
+Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on morphological identification (Phylum, class, Order, Family, Subfamily, Tribe, Genus, Species, Subspecies), grabs taxonomic ID (taxid) using NCBI Entrez API, determines taxonomic rank of taxid (matched_rank), and parses taxid and matched_rank to .csv.
 
-**usage: python 2_sample2taxid.py [path/to/BOLD_output.csv] [sample2taxid.csv]**
-- **path/to/BOLD_output.csv** = path to directory containing sample taxonomy information downloaded from BOLD (must specify filename)
-- **sample2taxid.csv** = 
+**usage: python 2_sample2taxid.py [path/to/BOLD_output.csv] [output.csv]**
+- **path/to/BOLD_output.csv** = path to directory containing sample taxonomy information downloaded from BOLD (must specify filename).
+- **output.csv** = name of .csv file containing desired fields.
+
+| Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank |
+| --------- | --------- |--------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
+| BGE_0001_A01  | Arthropoda | Insecta | Trichoptera | Apataniidae | Apataniinae | | Apatania | Apatania stylata | | 177658 | genus |
+| BGE_0001_A02 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus iridipennis | | 177627 | genus |
+| BGE_0001_A03 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus incertulus | | 3084599 | species |
