@@ -8,7 +8,11 @@ Takes path to directory containing raw reads (.fq.gz) and populates .csv with sa
   
 **output**
 - **[trimmed_parent_dir_name]_read_paths.csv**
-
+| ID  | forward | reverse |
+| --------- | --------- |---------|
+| BGE_0001_A01  | /path/to/R1.fq.gz  | path/to/R2.fq.gz |
+| BGE_0001_A02 | path/to/R1.fq.gz  | path/to/R2.fq.gz |
+| BGE_0001_A03 | path/to/R1.fq.gz | path/to/R2.fq.gz |
 
 ## 2_sample2taxid.py
 Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on morphological identification (Phylum, class, Order, Family, Subfamily, Tribe, Genus, Species, Subspecies), grabs taxonomic ID (taxid) using NCBI Entrez API, determines taxonomic rank of taxid (matched_rank), and parses taxid and matched_rank to .csv
