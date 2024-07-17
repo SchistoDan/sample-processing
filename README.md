@@ -24,7 +24,7 @@ Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on
 
 **usage: python 2_sample2taxid.py [path/to/BOLD_output.csv] [output.csv]**
 - path/to/BOLD_output.csv = path to directory containing sample taxonomy information downloaded from BOLD (must specify filename).
-- sample2taxid_out.csv = name of .csv file containing parsed fields (see below)
+- output.csv = name of .csv file containing parsed fields (see below)
 
 | Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank |
 | --------- | --------- |--------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
@@ -32,14 +32,14 @@ Takes BOLD taxonomy.tsv output containing sample ID and taxonomic ranks based on
 | BGE_0001_A02 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus iridipennis | | 177627 | genus |
 | BGE_0001_A03 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus incertulus | | 3084599 | species |
 
-
+Also outputs a .txt file containing a list of deuplicated taxids.
 
 ## 3_makeSKImsample.py
 Takes Process ID, forward and reverse read paths, and taxid and parses them to .csv ready for input into skim2mito
 
 **usage: python 3_makeSKIMsamples.py [input_file1.csv] [input_file2.csv]**
 - input_file1.csv = [trimmed_parent_dir_name]_read_paths.csv
-- input_file1.csv = sample2taxid_out.csv
+- input_file1.csv = output.csv from 2_sample2taxid.py
 
 **output**
 - [trimmed_parent_dir_name]_samples.csv
