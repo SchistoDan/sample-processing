@@ -57,6 +57,6 @@ Takes Process ID, forward and reverse read paths, and taxid and parses them to .
 
 | ID | forward | reverse | taxid |
 | --------- | --------- |--------- | --------- |
-| BGE_0001_A01  | relative/path/to/R1.fq.gz | relative/path/to/R2.fq.gz | 177658 |
-| BGE_0001_A02 | relative/path/to/R1.fq.gz | relative/path/to/R2.fq.gz | 177627 |
-| BGE_0001_A03 | relative/path/to/R1.fq.gz | relative/path/to/R2.fq.gz | 3084599 |
+| BSNHM001-24  | relative/path/to/R1.fq.gz | relative/path/to/R2.fq.gz | 177658 |
+| BSNHM038-24 | relative/path/to/R1.fq.gz | relative/path/to/R2.fq.gz | 177627 |
+| BSNHM046-24 | relative/path/to/R1.fq.gz | relative/path/to/R2.fq.gz | 3084599 |
