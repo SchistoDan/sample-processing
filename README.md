@@ -52,7 +52,10 @@ Takes BOLD_output.csv containing sample ID, Process ID, and taxonomic ranks base
 
 
 ## 4_makeSKIMsample.py
-Takes Process ID, forward and reverse read paths, and taxid, and parses them to .csv ready for input into skim2mito
+Takes Process ID, forward and reverse read paths, and taxid, and parses them to .csv ready for input into skim2mito.
+**4_makeSKIMsample-rel.py** = outputs relative paths to reads (currently needed by skim2mito - needs to be changed to abs).
+**4_makeSKIMsample-abs.py** = outputs absolute paths to reads (needed by MitoGeneExtractor).
+
 
 **usage: python 4_makeSKIMsamples.py [input_file1.csv] [input_file2.csv]**
 - input_file1.csv = [trimmed_parent_dir_name]_read_paths.csv
