@@ -1,9 +1,9 @@
-Series of python scripts to take BOLD-downloaded taxonomy and paths to raw reads and create sample submission CSV for input into [skim2mito](https://github.com/o-william-white/skim2mito)
+Series of python scripts to take BOLD download and paths to raw reads and create sample submission CSV for input into [skim2mito](https://github.com/o-william-white/skim2mito)
 
 
 
 ## 1_combine_tsv.py
-Takes BOLD DB download, merges two .tsv files based on Sample ID, and parses Sample ID, Process ID, and taxonomic rankings (Phylum, Class, order, family, Genus, and Species) to .csv file
+Takes BOLD download (lab.tsv and taxonomy.tsv), merges two .tsv files based on Sample ID, and parses Sample ID, Process ID, and taxonomic rankings (Phylum, Class, order, family, Genus, and Species) to .csv file.
 
 **usage: python 1_combine_tsv.py [/path/to/lab.tsv] [/path/to/taxonomy.tsv] [/path/to/BOLD_output.csv] [/path/to/unmatched_sampleids.txt]**
 - lab.tsv = contains Process ID and Sample ID.
@@ -34,18 +34,20 @@ Takes path to directory containing raw reads (.fq.gz) and populates .csv with sa
 
 
 ## 3_sample2taxid.py
-Takes BOLD_output.csv containing sample ID, Process ID, and taxonomic ranks based on BOLD morphological identification (Phylum, class, Order, Family, Subfamily, Tribe, Genus, Species, Subspecies), grabs taxonomic ID (taxid) using NCBI Entrez API, determines taxonomic rank of taxid, and parses taxid and matched_rank to .csv.
+Takes BOLD_output.csv containing sample ID, Process ID, and taxonomic ranks based on BOLD morphological identification (Phylum, class, Order, Family, Subfamily, Tribe, Genus, Species, Subspecies), grabs taxonomic ID (taxid) using NCBI Entrez API, determines taxonomic rank of taxid, parses taxid and matched_rank to .csv, and grabs other fields from BOLD downlaod that are required for downstream sample registration (generation of sample accession numbers) using ENA Webin.
 
-**usage: python 3_sample2taxid.py [path/to/BOLD_output.csv] [output.csv]**
+**usage: python 3_sample2taxid.py [path/to/BOLD_output.csv] [path/to/directory_containing_tsv_files] [sample2taxid_out.csv]**
 - path/to/[BOLD_output].csv = path to directory containing [BOLD_output].csv output by '1_combine_tsv.py'.
+- path/to/directory_containing_tsv_files = path to directory containing BOLD container dowlonad (.tsv files - taxonomy, lab, collection_data, voucher, specimen_details).
 - sample2taxid_out.csv = can be named anuthing. Contains parsed fields below.
 - [BOLD_output]_unique_taxids.txt = list of deuplicated taxids.
 
-| Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank |
-| --------- | --------- |--------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
-| BGE_0001_A01  | Arthropoda | Insecta | Trichoptera | Apataniidae | Apataniinae | | Apatania | Apatania stylata | | 177658 | genus |
-| BGE_0001_A02 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus iridipennis | | 177627 | genus |
-| BGE_0001_A03 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus incertulus | | 3084599 | species |
+| Sample ID | Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank | specimen_voucher | lifestage | collection date | geographic_location (country and/or sea) | geographic_location (region and locality) | latitude | longitude | collected_by | habitat | identified_by | collection institution | organism part | sex |
+| --- | --- |--- | --- | --- | --- | --- | --- | --- | --- | ---| --- | --- | --- |--- | --- | --- | --- | --- | --- | --- | --- | ---| --- | --- | --- |
+| BGE_0001_A01  | BSNHM001-24 | Arthropoda | Insecta | Trichoptera | Apataniidae | Apataniinae | | Apatania | Apatania stylata | | 177658 | genus | NHMUK014509393 | not collected | not collected | France | not collected | | | | | not collected | not collected| |
+| BGE_0001_A02 | BSNHM002-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus iridipennis | | 177627 | genus | NHMUK014408578 | not collecte | not collected | Switzerland | not collected | | | | | not collected | not collected | |
+| BGE_0001_A03 | BSNHM003-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Hydropsychidae | | Diplectrona | Diplectrona meridionalis | | 177860 | genus | NHMUK014508330 | not collected | not collected | France | not collected | | | | | not collected | not collected | |
+
 
 
 
@@ -59,8 +61,8 @@ Takes Process ID, forward and reverse read paths, and taxid, and parses them to 
 
 **usage: python 4_makeSKIMsamples.py [input_file1.csv] [input_file2.csv]**
 - input_file1.csv = [trimmed_parent_dir_name]_read_paths.csv
-- input_file1.csv = [sample2taxid].csv from 2_sample2taxid.py
-- [trimmed_parent_dir_name]_samples.csv = 'samples.csv' for input into skim2mito and MGE (via snakemake)
+- input_file1.csv = [sample2taxid].csv from '2_sample2taxid.py'.
+- [trimmed_parent_dir_name]_samples.csv = 'samples.csv' for input into skim2mito and MGE (via snakemake).
 
 | ID | forward | reverse | taxid |
 | --------- | --------- |--------- | --------- |
