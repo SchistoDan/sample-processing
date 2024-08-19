@@ -48,7 +48,7 @@ Takes BOLD_output.csv containing sample ID, Process ID, and taxonomic ranks base
 | BGE_0001_A02 | BSNHM002-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | | Agapetus | Agapetus iridipennis | | 177627 | genus | 'Museum ID' | adult | YYYY-MM-DD | Switzerland | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | Naturalis | not collected | F |
 | BGE_0001_A03 | BSNHM003-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Hydropsychidae | | Diplectrona | Diplectrona meridionalis | | 177860 | genus | 'Museum ID' | adult | YYYY-MM-DD |  France | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | NHMMUK | Leg | M |
 
-- If data not collected for sample, 'not collected' output to field.
+- If data not collected for sample, 'not collected' output to field required in ToL ena sample registration checklist.
 
 
 
