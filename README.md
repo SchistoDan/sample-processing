@@ -39,7 +39,7 @@ Takes BOLD_output.csv containing sample ID, Process ID, and taxonomic ranks base
 **usage: python 3_sample2taxid.py [path/to/BOLD_output.csv] [path/to/directory_containing_tsv_files] [sample2taxid_out.csv]**
 - path/to/[BOLD_output].csv = path to directory containing [BOLD_output].csv output by '1_combine_tsv.py'.
 - path/to/directory_containing_tsv_files = path to directory containing BOLD container dowlonad (.tsv files - taxonomy, lab, collection_data, voucher, specimen_details).
-- sample2taxid_out.csv = can be named anuthing. Contains parsed fields below.
+- sample2taxid_out.csv = can be named anuthing. Contains fields as seen below.
 - [BOLD_output]_unique_taxids.txt = list of deuplicated taxids.
 
 | Sample ID | Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank | specimen_voucher | lifestage | collection date | geographic_location (country and/or sea) | geographic_location (region and locality) | latitude | longitude | collected_by | habitat | identified_by | collection institution | organism part | sex |
