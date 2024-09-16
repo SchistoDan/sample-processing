@@ -10,9 +10,11 @@ Script compiles fields requried for downstream uses (e.g. submission of reads to
 
 
 ## 2_samples_spreadsheet.py ##
-**usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv**
+Script to generate samples.csv requried to run MGE and skim2mito piplines.
+**usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]**
 - path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.
 - path/to/output/dir/samples_metadata.csv: Directory containing sample_metadta.csv file.
+- outputs 'samples.csv' (see below for example).
 
 
 
