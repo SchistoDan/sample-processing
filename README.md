@@ -1,12 +1,18 @@
-Python script that takes BOLD container download (.tsv files) and paths to raw reads, fetches taxonomic ID (taxid) using taxonomic ranks for each sample, merges relevant fields into output ([output].csv) from BOLD-downlaoded files needed for downstream [upload of reads to ENA](https://github.com/bge-barcoding/ena-read-upload), creates analysis pipeline sample submission CSV (samples.csv) for input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and compiles list of deduplicated taxid's (unique_taxids.txt)
+Python scripts that take BOLD container download (.tsv files) and paths to raw reads, fetches taxonomic ID (taxid) using taxonomic ranks for each sample, merges relevant fields into output ([output].csv) from BOLD-downlaoded files needed for downstream [upload of reads to ENA](https://github.com/bge-barcoding/ena-read-upload), creates analysis pipeline sample submission CSV (samples.csv) for input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE).
 
 
 
-## sample_processing.py ##
-**usage: python sample_processing.py [path/to/BOLD/download/dir] [path/to/raw/read/dir] [path/to/output/dir/[output].csv]**
-- path/to/BOLD/download/dir: path to directory containing .tsv files (voucher.tsv, collection_data.tsv, specimen_details.tsv, taxonomy.tsv, and lab.tsv) downloaded from BOLD DB.
-- path/to/raw/read/dir: Path to directory containing subdirectories with raw PE reads files. Give parent directory of subdirectories as input here.
-- path/to/output/dir/[output].csv: Directory to create [output].csv, samples.csv and unique_taxids.txt within. Need to name [output].csv, whereas samples.csv and unique_taxids.txt are named as is.
+## 1_sample_processing.py ##
+Script compiles fields requried for downstream uses (e.g. submission of reads to ENA) from .tsv files downloaded from BOLD. 
+**usage: python sample_processing.py [path/to/BOLD/download/dir]**
+- path/to/BOLD/download/dir: Path to directory containing .tsv files (voucher.tsv, collection_data.tsv, specimen_details.tsv, taxonomy.tsv, and lab.tsv)
+- outputs 'samples_metadata.csv' (see below for example).
+
+
+## 2_samples_spreadsheet.py ##
+**usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv**
+- path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.
+- path/to/output/dir/samples_metadata.csv: Directory containing sample_metadta.csv file.
 
 
 
@@ -19,7 +25,7 @@ Python script that takes BOLD container download (.tsv files) and paths to raw r
 
 
 
-**Example [output].csv**
+**Example samples_metadata.csv**
 | Sample ID | Process ID  | Phylum | Class | Order | Family | Subfamily | Tribe | Genus | Species | Subspecies | taxid | matched_rank | specimen_voucher | lifestage | collection date | geographic_location (country and/or sea) | geographic_location (region and locality) | latitude | longitude | collected_by | habitat | identified_by | collection institution | organism part | sex |
 | --- | --- |--- | --- | --- | --- | --- | --- | --- | --- | ---| --- | --- | --- |--- | --- | --- | --- | --- | --- | --- | --- | ---| --- | --- | --- |
 | BGE_0001_A01  | BSNHM001-24 | Arthropoda | Insecta | Trichoptera | Apataniidae | Apataniinae | | Apatania | Apatania stylata | | 177658 | genus | 'Museum ID' | adult | YYYY-MM-DD | France | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | NHMMUK | Whole | M |
