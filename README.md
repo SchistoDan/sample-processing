@@ -1,4 +1,4 @@
-Python scripts that take BOLD container download (.tsv files) and paths to raw reads, fetches taxonomic ID (taxid) using taxonomic ranks for each sample, merges relevant fields into output ([output].csv) from BOLD-downlaoded files needed for downstream [upload of reads to ENA](https://github.com/bge-barcoding/ena-read-upload), creates analysis pipeline sample submission CSV (samples.csv) for input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE).
+Python scripts that take BOLD container download (.tsv files) and paths to raw reads, fetches taxonomic ID (taxid) from local NCBI tax dump using taxonomic ranks for each sample, merges relevant fields into output ([output].csv) from BOLD-downlaoded files needed for downstream [upload of reads to ENA](https://github.com/bge-barcoding/ena-read-upload), creates analysis pipeline sample submission CSV (samples.csv) for input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and requesting taxid creation from ENA.
 
 
 
@@ -6,7 +6,7 @@ Python scripts that take BOLD container download (.tsv files) and paths to raw r
 Script compiles fields requried for downstream uses (e.g. submission of reads to ENA) from .tsv files downloaded from BOLD. 
 **usage: python sample_processing.py [path/to/BOLD/download/dir]**
 - path/to/BOLD/download/dir: Path to directory containing .tsv files (voucher.tsv, collection_data.tsv, specimen_details.tsv, taxonomy.tsv, and lab.tsv)
-- outputs 'samples_metadata.csv' (see below for example).
+- outputs 'sample_metadata.csv' (see below for example).
 
 
 ## 2_samples_spreadsheet.py ##
