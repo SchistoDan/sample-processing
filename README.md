@@ -4,13 +4,13 @@ Collection of scripts for processing BOLD-downloaded sample metadata, collects o
 ## download_taxonomy.sh ##
 - Downloads the [newst NCBI taxonomy (i.e. new_taxdump)](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/).
 - If the taxdump was previously downloaded to the same directory, the script will replace that taxdump with the newst version. The tar.gz download will also be removed post-extraction.
-  - `**usage: bash/sbatch/srun download_taxonomy.sh <output_file> <extract_dir>**`
+  - **`usage: bash/sbatch/srun download_taxonomy.sh <output_file> <extract_dir>`**
   - `output_file = Name of NCBI taxdump (e.g. new_taxdump.tar.gz)`
   - `extract_dir = Directory to output taxdump files to (e.g. new_taxdump). If given a relative or absolute path, new directories will be created.`
  
 ## combine_tsv.py ##
 - Merges TSV files from multiple zipped folders downloaded from BOLD.
-  - `**usage: python combine_tsv.py <output_dir> <zip_files_dir>**`
+  - **`usage: python combine_tsv.py <output_dir> <zip_files_dir>`**
   - `output_dir: Directory where combined .tsv files will be stored.`
   - `zip_files_dir: Directory containing the zipped files to be merged.`
 
@@ -24,7 +24,7 @@ Collection of scripts for processing BOLD-downloaded sample metadata, collects o
   - lineage (full NCBI lineage for taxid)
   - lineage_mismatch (did the major BOLD taxonomic ranks match the fetched NCBI lineage)
   - BOLD sample metadata (Identifier (identified_by), Collection Date (collection_date), Geographic Location (Country/Ocean) (geographic_location), Exact Site (geographic_location_locality), Latitude (latitude), Longitude (longitude), Collected By (collected_by), Habitat (habitat), Tissue Descriptor (organism_part), Sex (sex), Life stage (lifestage), Museum ID (specimen_voucher), Institution Storing (collecting_institution).
-- `**usage: python local_bold_processing.py <input_dir> <rankedlineage_path> <output_dir>**`
+- **`usage: python local_bold_processing.py <input_dir> <rankedlineage_path> <output_dir>`**
   - `input_dir = Directory containing BOLD-downloaded sample metadata (.tsv files).`
   - `rankedlineage_path = Path to NCBI taxonomic hierarchy/lineage (new_taxdump file).`
   - `output_dir = Directory to output sample_metadata.tsv to.`
@@ -40,13 +40,14 @@ If metadata was not collected for a particular sample, 'not collected' output to
  
 ## samples_spreadsheet.py ##
 Script to generate samples.csv requried to run MGE and skim2mito piplines.
-- `**usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]**`
-- `path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.`
+- **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
+**- `path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.`
 - `path/to/output/dir/samples_metadata.csv`: Directory containing sample_metadta.csv file.`
 - outputs 'samples.csv' containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory.
 
 ## Miro workflow ##
-![image](https://github.com/user-attachments/assets/daf3e929-c31a-4726-a60f-7ecdccae16e8)
+![image](https://github.com/user-attachments/assets/6eca3729-24f7-47c4-adf0-9052db5da6fe)
+
 
 
 
