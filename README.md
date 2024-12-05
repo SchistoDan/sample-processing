@@ -15,7 +15,7 @@ Collection of scripts for processing BOLD-downloaded sample metadata, collects o
   - `zip_files_dir: Directory containing the zipped files to be merged.`
 
 ## local_bold_processing.py ##
-- Merges relevant sample metadata from BOLD .tsv files and fetches NSBI taxonomic ID (taxID) by matching BOLD and NCBI taxonomy. Outputs sample_metadata.csv containing fields below to a specified directory:
+- Merges relevant sample metadata from BOLD .tsv files, and resolves the taxonomic ID using the hierarchical structure and checks for mismatches between BOLD and NCBI taxonomy. Outputs sample_metadata.csv containing fields below:
   - Sample ID
   - Process ID
   - BOLD taxonomic ranks (phylum->species)
