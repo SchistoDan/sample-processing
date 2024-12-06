@@ -1,20 +1,22 @@
 Collection of scripts for processing BOLD-downloaded sample metadata, collects other useful sample-related information, and generates input files for downstream processes ([uploading trimmed reads to ENA](https://github.com/bge-barcoding/ena-read-upload), input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and [requesting taxid creation from ENA](https://github.com/bge-barcoding/ena-taxid-creation)). Written by Ben Price and Dan Parsons @ NHMUK.
 
 
-## download_taxonomy.sh ##
+## 1_combine_tsv.py ##
+- Merges TSV files from multiple zipped folders downloaded from BOLD.
+  - **`usage: python combine_tsv.py <output_dir> <zip_files_dir>`**
+  - `output_dir: Directory where combined .tsv files will be stored.`
+  - `zip_files_dir: Directory containing the zipped files to be merged.`
+ 
+## 2_download_taxonomy.sh ##
 - Downloads the [newst NCBI taxonomy (i.e. new_taxdump)](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/).
 - If the taxdump was previously downloaded to the same directory, the script will replace that taxdump with the newst version. The tar.gz download will also be removed post-extraction.
   - **`usage: bash/sbatch/srun download_taxonomy.sh <output_file> <extract_dir>`**
   - `output_file = Name of NCBI taxdump (e.g. new_taxdump.tar.gz)`
   - `extract_dir = Directory to output taxdump files to (e.g. new_taxdump). If given a relative or absolute path, new directories will be created.`
  
-## combine_tsv.py ##
-- Merges TSV files from multiple zipped folders downloaded from BOLD.
-  - **`usage: python combine_tsv.py <output_dir> <zip_files_dir>`**
-  - `output_dir: Directory where combined .tsv files will be stored.`
-  - `zip_files_dir: Directory containing the zipped files to be merged.`
 
-## local_bold_processing.py ##
+
+## 3_local_bold_processing.py ##
 - Merges relevant sample metadata from BOLD .tsv files, and resolves the taxonomic ID using the hierarchical structure and checks for mismatches between BOLD and NCBI taxonomy. Outputs sample_metadata.csv containing fields below:
   - Sample ID
   - Process ID
@@ -38,7 +40,7 @@ If metadata was not collected for a particular sample, 'not collected' output to
 | BGE_0001_A02 | BSNHM002-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | Agapetus | Agapetus iridipennis | 177627 | genus | 'Museum ID' | adult | YYYY-MM-DD | Switzerland | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | Naturalis | not collected | F |
 | BGE_0001_A03 | BSNHM003-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Hydropsychidae | Diplectrona | Diplectrona meridionalis | 177860 | genus | 'Museum ID' | adult | YYYY-MM-DD |  France | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | NHMMUK | Leg | M |
  
-## samples_spreadsheet.py ##
+## 4_samples_spreadsheet.py ##
 Script to generate samples.csv requried to run MGE and skim2mito piplines. Script also screen BGE project samples using the 27 BGE project codes.
 - **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
 **- `path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.`
@@ -48,8 +50,4 @@ Script to generate samples.csv requried to run MGE and skim2mito piplines. Scrip
   - samples_[parent_dir_name]_nonproject.csv = contains all samples not containing BGE project codes.
 
 ## Miro workflow ##
-![image](https://github.com/user-attachments/assets/bab53ec3-7d67-4e39-a44e-0780f3ffe374)
-
-
-
-
+![image](![image](https://github.com/user-attachments/assets/dd960f04-2957-4ef1-bd58-d5457ecba777)
