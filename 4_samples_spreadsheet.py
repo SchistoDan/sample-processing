@@ -170,9 +170,9 @@ if __name__ == "__main__":
     else:
         print(
         """
-        Usage: python 2_sample_spreadsheet.py [parent_directory] [sample_metadata_file]
+        Usage: python 4_sample_spreadsheet.py [parent_directory] [sample_metadata_file]
         parent_directory: parent directory of subdirectories containing raw read pairs.
         sample_metadata_file: Path to the sample_metadata.csv file.
-        Example: python 2_samples_spreadsheet.py /path/to/raw_reads /path/to/sample_metadata.csv
+        Example: python 4_samples_spreadsheet.py /path/to/raw_reads /path/to/sample_metadata.csv
         """
         )
