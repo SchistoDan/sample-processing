@@ -39,14 +39,16 @@ If metadata was not collected for a particular sample, 'not collected' output to
 | BGE_0001_A03 | BSNHM003-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Hydropsychidae | Diplectrona | Diplectrona meridionalis | 177860 | genus | 'Museum ID' | adult | YYYY-MM-DD |  France | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | NHMMUK | Leg | M |
  
 ## samples_spreadsheet.py ##
-Script to generate samples.csv requried to run MGE and skim2mito piplines.
+Script to generate samples.csv requried to run MGE and skim2mito piplines. Script also screen BGE project samples using the 27 BGE project codes.
 - **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
 **- `path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.`
 - `path/to/output/dir/samples_metadata.csv`: Directory containing sample_metadta.csv file.`
-- outputs 'samples.csv' containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory.
+- outputs two CSV files containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory.
+  - samples_[parent_dir_name].csv = contains all samples containing BGE project codes in their Process ID's.
+  - samples_[parent_dir_name]_nonproject.csv = contains all samples not containing BGE project codes.
 
 ## Miro workflow ##
-![image](https://github.com/user-attachments/assets/6eca3729-24f7-47c4-adf0-9052db5da6fe)
+![image](https://github.com/user-attachments/assets/bab53ec3-7d67-4e39-a44e-0780f3ffe374)
 
 
 
