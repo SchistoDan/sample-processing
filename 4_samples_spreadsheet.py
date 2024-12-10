@@ -2,21 +2,22 @@
 Sample Spreadsheet Generation Script
 ==================================
 
-This script processes NGS raw read files and generates samples.csv and samples_nonproject.csv files 
-containing file paths and taxonomic IDs. It searches through a directory structure to find 
-paired-end read files (R1 and R2) that match specific Process IDs, and associates them with 
-corresponding taxonomic IDs from a metadata file. Process IDs are filtered based on project codes.
+This script processes NGS raw read files and generates samples.csv, samples_nonproject.csv, 
+and samples_types.csv files containing file paths and taxonomic IDs. It searches through a 
+directory structure to find paired-end read files (R1 and R2) that match specific Process IDs, 
+and associates them with corresponding taxonomic IDs and type status from a metadata file.
 
 Key Features:
 ------------
 - Recursively searches directories for paired FASTQ files (.fastq.gz)
 - Matches Process IDs from sample metadata with raw read files
-- Filters samples based on project codes
+- Filters samples based on project codes and type status
 - Excludes 'Undetermined' and 'NC' (Negative Control) samples
 - Associates taxonomic IDs with each sample
-- Generates two output files:
+- Generates three output files:
   * samples.csv: Contains samples with valid project codes
   * samples_nonproject.csv: Contains samples without project codes
+  * samples_types.csv: Contains samples marked as types in metadata
 
 Input Requirements:
 -----------------
@@ -27,32 +28,8 @@ Input Requirements:
 
 2. Sample Metadata File:
    - CSV format
-   - Must contain columns: 'Process ID' and 'taxid'
+   - Must contain columns: 'Process ID', 'taxid', and 'type_status'
    - Process IDs should match those in the raw read directory names
-
-Output:
--------
-Generates two CSV files:
-1. samples.csv with columns:
-   - ID: Process ID (containing a valid project code)
-   - forward: Absolute path to R1 (forward) read file
-   - reverse: Absolute path to R2 (reverse) read file
-   - taxid: Taxonomic ID from metadata
-
-2. samples_nonproject.csv with the same columns but containing samples
-   without valid project codes
-
-Usage:
-------
-python script.py [parent_directory] [sample_metadata_file]
-
-Example:
-python script.py /path/to/raw_reads /path/to/sample_metadata.csv
-
-Dependencies:
-------------
-- pandas
-- Python standard libraries (os, csv, sys)
 """
 
 import os
@@ -78,8 +55,25 @@ def get_directory_name(path):
 def has_project_code(process_id):
     return any(code in process_id for code in PROJECT_CODES)
 
-def extract_id_reads_taxid(parent_dir, process_ids, taxid_dict):
+def extract_id_reads_taxid_type(parent_dir, metadata_df):
+    """
+    Extract file paths and metadata for each sample.
+    
+    Args:
+        parent_dir (str): Parent directory containing sample subdirectories
+        metadata_df (pd.DataFrame): DataFrame containing sample metadata
+    
+    Returns:
+        dict: Dictionary with Process IDs as keys and tuples of 
+             (r1_path, r2_path, taxid, type_status) as values
+    """
     results = {}
+    process_ids = set(metadata_df['Process ID'].astype(str))
+    
+    # Create dictionaries for quick lookup
+    taxid_dict = dict(zip(metadata_df['Process ID'].astype(str), metadata_df['taxid']))
+    type_status_dict = dict(zip(metadata_df['Process ID'].astype(str), metadata_df['type_status']))
+    
     for root, dirs, files in os.walk(parent_dir):
         for subdir in dirs:
             if "Undetermined" in subdir or "NC" in subdir:
@@ -93,74 +87,98 @@ def extract_id_reads_taxid(parent_dir, process_ids, taxid_dict):
                     break
             if not process_id:
                 continue
+                
             r1_path, r2_path = None, None
             for filename in os.listdir(subdir_path):
                 if "_R1_" in filename and filename.endswith(".fastq.gz"):
                     r1_path = os.path.abspath(os.path.join(subdir_path, filename))
                 elif "_R2_" in filename and filename.endswith(".fastq.gz"):
                     r2_path = os.path.abspath(os.path.join(subdir_path, filename))
+                    
             taxid = taxid_dict.get(process_id, 'NA')
+            type_status = type_status_dict.get(process_id, '')
+            
             if r1_path and r2_path:
-                results[process_id] = (r1_path, r2_path, taxid)
+                results[process_id] = (r1_path, r2_path, taxid, type_status)
+    
     return results
 
 def write_filtered_results(results, parent_dir):
     """
-    Writes raw read file paths and taxid to two separate CSV files based on project codes.
+    Writes raw read file paths and metadata to three separate CSV files.
     
     Args:
-        results (dict): A dictionary where keys are Process IDs and values are tuples containing:
-            - Path to R1 (forward) read file
-            - Path to R2 (reverse) read file
-            - Taxonomic ID
+        results (dict): Dictionary with Process IDs as keys and tuples of 
+                       (r1_path, r2_path, taxid, type_status) as values
         parent_dir (str): Parent directory path used to name output files
     
     Output Files:
         - samples_<parent_dir_name>.csv: Contains samples with valid project codes
         - samples_<parent_dir_name>_nonproject.csv: Contains samples without project codes
+        - samples_<parent_dir_name>_types.csv: Contains samples marked as types
     """
-    # Get directory name for file naming
     dir_name = get_directory_name(parent_dir)
     
     # Create output filenames
     project_filename = f'samples_{dir_name}.csv'
     nonproject_filename = f'samples_{dir_name}_nonproject.csv'
+    types_filename = f'samples_{dir_name}_types.csv'
     
-    # Separate results based on project codes
-    project_samples = {pid: data for pid, data in results.items() if has_project_code(pid)}
-    non_project_samples = {pid: data for pid, data in results.items() if not has_project_code(pid)}
+    # Separate results based on criteria
+    project_samples = {}
+    non_project_samples = {}
+    type_samples = {}
+    
+    for pid, (r1_path, r2_path, taxid, type_status) in results.items():
+        # Check if sample is a type specimen
+        if isinstance(type_status, str) and 'type' in type_status.lower():
+            type_samples[pid] = (r1_path, r2_path, taxid, type_status)
+        
+        # Separate by project code
+        if has_project_code(pid):
+            project_samples[pid] = (r1_path, r2_path, taxid, type_status)
+        else:
+            non_project_samples[pid] = (r1_path, r2_path, taxid, type_status)
     
     # Write project samples
     with open(project_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['ID', 'forward', 'reverse', 'taxid'])
-        for process_id, (r1_path, r2_path, taxid) in project_samples.items():
-            writer.writerow([process_id, r1_path, r2_path, taxid])
+        writer.writerow(['ID', 'forward', 'reverse', 'taxid', 'type_status'])
+        for process_id, (r1_path, r2_path, taxid, type_status) in project_samples.items():
+            writer.writerow([process_id, r1_path, r2_path, taxid, type_status])
     
     # Write non-project samples
     with open(nonproject_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['ID', 'forward', 'reverse', 'taxid'])
-        for process_id, (r1_path, r2_path, taxid) in non_project_samples.items():
-            writer.writerow([process_id, r1_path, r2_path, taxid])
+        writer.writerow(['ID', 'forward', 'reverse', 'taxid', 'type_status'])
+        for process_id, (r1_path, r2_path, taxid, type_status) in non_project_samples.items():
+            writer.writerow([process_id, r1_path, r2_path, taxid, type_status])
     
-    return len(project_samples), len(non_project_samples), project_filename, nonproject_filename
+    # Write type samples
+    with open(types_filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['ID', 'forward', 'reverse', 'taxid', 'type_status'])
+        for process_id, (r1_path, r2_path, taxid, type_status) in type_samples.items():
+            writer.writerow([process_id, r1_path, r2_path, taxid, type_status])
+    
+    return (len(project_samples), len(non_project_samples), len(type_samples),
+            project_filename, nonproject_filename, types_filename)
 
 def main(parent_dir, sample_metadata_file):
-    # Read Process IDs and taxid from sample_metadata.csv
-    metadata_df = pd.read_csv(sample_metadata_file, low_memory=False)  # Added low_memory=False
-    process_ids = set(metadata_df['Process ID'].astype(str))
-    taxid_dict = dict(zip(metadata_df['Process ID'].astype(str), metadata_df['taxid']))
+    # Read metadata file
+    metadata_df = pd.read_csv(sample_metadata_file, low_memory=False)
     
-    # Find files (forward/reverse reads)
-    results = extract_id_reads_taxid(parent_dir, process_ids, taxid_dict)
+    # Find files and extract metadata
+    results = extract_id_reads_taxid_type(parent_dir, metadata_df)
     
     # Write filtered results to separate files
-    project_count, non_project_count, project_file, nonproject_file = write_filtered_results(results, parent_dir)
+    (project_count, non_project_count, type_count,
+     project_file, nonproject_file, types_file) = write_filtered_results(results, parent_dir)
     
     print(f"Processing complete:")
     print(f"- {project_count} samples written to '{project_file}'")
     print(f"- {non_project_count} samples written to '{nonproject_file}'")
+    print(f"- {type_count} type specimens written to '{types_file}'")
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:
@@ -170,9 +188,9 @@ if __name__ == "__main__":
     else:
         print(
         """
-        Usage: python 4_sample_spreadsheet.py [parent_directory] [sample_metadata_file]
+        Usage: python script.py [parent_directory] [sample_metadata_file]
         parent_directory: parent directory of subdirectories containing raw read pairs.
         sample_metadata_file: Path to the sample_metadata.csv file.
-        Example: python 4_samples_spreadsheet.py /path/to/raw_reads /path/to/sample_metadata.csv
+        Example: python script.py /path/to/raw_reads /path/to/sample_metadata.csv
         """
         )
