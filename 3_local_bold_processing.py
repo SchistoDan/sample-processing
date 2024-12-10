@@ -1,3 +1,53 @@
+"""
+Sample Metadata Generator for Taxonomic Data
+
+This script processes taxonomic and specimen data from multiple TSV files to generate
+consolidated sample metadata. It handles taxonomic classification, geographic information,
+collection details, and specimen characteristics.
+
+Key Features:
+- Processes multiple TSV input files (voucher, collection, specimen, taxonomy, lab, custom fields)
+- Resolves taxonomic IDs using a ranked lineage reference file
+- Handles missing data with standardised 'not collected' values
+- Standardises date formats
+- Supports parallel processing for improved performance
+- Validates taxonomic lineages for consistency
+
+Required Input Files:
+- voucher.tsv: Contains voucher specimen information
+- collection.tsv: Contains collection event data
+- specimen.tsv: Contains specimen-specific information
+- taxonomy.tsv: Contains taxonomic classification data
+- lab.tsv: Contains laboratory processing information
+- merged_custom_fields.tsv: Contains additional type status information
+- rankedlineage.dmp: Reference file for taxonomic lineage resolution
+
+Output:
+- sample_metadata.csv: Consolidated metadata file containing all processed information
+
+Usage:
+    python 3_local_bold_processing.py <input_directory> <rankedlineage_path> <output_directory>
+
+Arguments:
+    input_directory: Directory containing all required TSV files
+    rankedlineage_path: Path to the rankedlineage.dmp file
+    output_directory: Directory where the output CSV will be saved
+
+Dependencies:
+    - pandas
+    - numpy
+    - concurrent.futures (for parallel processing)
+    - datetime
+    - csv
+    - os
+    - sys
+    - time
+
+Note:
+    All missing values in any field will be replaced with 'not collected' in the output.
+    Dates are standardised to YYYY-MM-DD (BCDM) format.
+"""
+
 import sys
 import os
 import pandas as pd
@@ -70,7 +120,7 @@ def find_best_match(matches, target_ranks):
                 if match[rank].lower() == target_ranks[rank].lower():
                     score += 1
                 else:
-                    # Penalize mismatches at lower ranks more heavily
+                    # Penalise mismatches at lower ranks more heavily
                     score -= (len(rank_order) - rank_order.index(rank))
         
         if score > best_match_score:
@@ -223,7 +273,7 @@ def locate_files_in_directory(directory):
     """
     Function to locate the required TSV files in the specified directory
     """
-    voucher_file = collection_file = specimen_file = taxonomy_file = lab_file = None
+    voucher_file = collection_file = specimen_file = taxonomy_file = lab_file = custom_fields_file = None
     for filename in os.listdir(directory):
         if 'voucher' in filename.lower():
             voucher_file = os.path.join(directory, filename)
@@ -235,18 +285,20 @@ def locate_files_in_directory(directory):
             taxonomy_file = os.path.join(directory, filename)
         elif 'lab' in filename.lower():
             lab_file = os.path.join(directory, filename)
+        elif 'merged_custom_fields' in filename.lower():
+            custom_fields_file = os.path.join(directory, filename)
     
-    if not all([voucher_file, collection_file, specimen_file, taxonomy_file, lab_file]):
+    if not all([voucher_file, collection_file, specimen_file, taxonomy_file, lab_file, custom_fields_file]):
         print("Error: Some required files are missing in the directory.")
     
-    return voucher_file, collection_file, specimen_file, taxonomy_file, lab_file
+    return voucher_file, collection_file, specimen_file, taxonomy_file, lab_file, custom_fields_file
 
 def load_tsv_files(tsv_directory_path):
     """
     Load all required TSV files into pandas DataFrames
     """
     print(f"Loading TSV files from {tsv_directory_path}...")
-    voucher_file, collection_file, specimen_file, taxonomy_file, lab_file = locate_files_in_directory(tsv_directory_path)
+    voucher_file, collection_file, specimen_file, taxonomy_file, lab_file, custom_fields_file = locate_files_in_directory(tsv_directory_path)
     
     voucher_df = pd.read_csv(voucher_file, sep='\t', usecols=['Sample ID', 'Museum ID', 'Institution Storing'])
     collection_df = pd.read_csv(collection_file, sep='\t', usecols=['Sample ID', 'Collection Date', 'Country/Ocean', 'Collectors', 'Habitat', 'Exact Site', 'Lat', 'Lon'])
@@ -254,10 +306,19 @@ def load_tsv_files(tsv_directory_path):
     taxonomy_df = pd.read_csv(taxonomy_file, sep='\t', usecols=['Sample ID', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species', 'Identifier'])
     lab_df = pd.read_csv(lab_file, sep='\t', usecols=['Sample ID', 'Process ID'])
     
+    # Modified to skip first row and use correct column name
+    custom_fields_df = pd.read_csv(custom_fields_file, 
+                                  sep='\t', 
+                                  skiprows=1,  # Skip the first row
+                                  usecols=['SampleID', 'Type Status'])
+    
+    # Rename the column to match the others
+    custom_fields_df = custom_fields_df.rename(columns={'SampleID': 'Sample ID'})
+    
     print("TSV files loaded successfully.")
-    return voucher_df, collection_df, specimen_df, taxonomy_df, lab_df
+    return voucher_df, collection_df, specimen_df, taxonomy_df, lab_df, custom_fields_df
 
-def process_sample(sample_id, voucher_df, collection_df, specimen_df, taxonomy_df, lab_df, tax_tree, fill_missing, standardise_date_format):
+def process_sample(sample_id, voucher_df, collection_df, specimen_df, taxonomy_df, lab_df, custom_fields_df, tax_tree, fill_missing, standardise_date_format):
     """
     Process a single sample and return its metadata
     """
@@ -309,13 +370,14 @@ def process_sample(sample_id, voucher_df, collection_df, specimen_df, taxonomy_d
         "lifestage": fill_missing(specimen_df.loc[specimen_df['Sample ID'] == sample_id, 'Life Stage'].values[0] if 'Life Stage' in specimen_df.columns else np.nan),
         "specimen_voucher": fill_missing(voucher_df.loc[voucher_df['Sample ID'] == sample_id, 'Museum ID'].values[0] if 'Museum ID' in voucher_df.columns else np.nan),
         "collecting_institution": fill_missing(voucher_df.loc[voucher_df['Sample ID'] == sample_id, 'Institution Storing'].values[0] if 'Institution Storing' in voucher_df.columns else np.nan),
+        "type_status": fill_missing(custom_fields_df.loc[custom_fields_df['Sample ID'] == sample_id, 'Type Status'].values[0] if not custom_fields_df.loc[custom_fields_df['Sample ID'] == sample_id, 'Type Status'].empty or custom_fields_df.loc[custom_fields_df['Sample ID'] == sample_id, 'Type Status'].values[0] == '' else np.nan),
     }
 
 def create_sample_metadata(input_dir, rankedlineage_path, output_dir):
     print(f"Starting metadata generation from input directory: {input_dir} and rankedlineage file: {rankedlineage_path}")
     
     # Load all required files
-    voucher_df, collection_df, specimen_df, taxonomy_df, lab_df = load_tsv_files(input_dir)
+    voucher_df, collection_df, specimen_df, taxonomy_df, lab_df, custom_fields_df = load_tsv_files(input_dir)
     tax_tree = load_rankedlineage(rankedlineage_path)
     
     # Create output directory if it doesn't exist
@@ -327,7 +389,7 @@ def create_sample_metadata(input_dir, rankedlineage_path, output_dir):
         "species", "taxid", "matched_rank", "lineage", "lineage_mismatch", "collection_date", "geographic_location",
         "geographic_location_locality", "latitude", "longitude", "collected_by",
         "habitat", "organism_part", "sex", "lifestage", "specimen_voucher",
-        "collecting_institution", "identified_by"
+        "collecting_institution", "identified_by", "type_status"
     ]
     
     def fill_missing(value):
@@ -368,6 +430,7 @@ def create_sample_metadata(input_dir, rankedlineage_path, output_dir):
                     specimen_df, 
                     taxonomy_df, 
                     lab_df, 
+                    custom_fields_df,
                     tax_tree, 
                     fill_missing, 
                     standardise_date_format
@@ -410,4 +473,4 @@ if __name__ == "__main__":
         else:
             print(f"Error: '{input_dir}' is not a valid directory.")
     else:
-        print("Usage: python script_name.py <input_directory> <rankedlineage_path> <output_directory>")
+        print("Usage: python 3_local_bold_processing.py <input_directory> <rankedlineage_path> <output_directory>")
