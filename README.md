@@ -7,7 +7,7 @@ Collection of scripts for processing BOLD-downloaded sample metadata, collects o
   - `output_dir: Directory where combined .tsv files will be stored.`
   - `zip_files_dir: Directory containing the zipped files to be merged.
     - Recommended directory structure:
-```├── parent_directory/
+```parent_directory/
 ├── collection_data.tsv
 ├── lab.tsv
 ├── merged_custom_fields.tsv
@@ -32,7 +32,7 @@ Collection of scripts for processing BOLD-downloaded sample metadata, collects o
     ├── specimen_details.tsv
     ├── tags.tsv
     ├── taxonomy.tsv
-    └── voucher.tsv````
+    └── voucher.tsv```
  
 ## 2_download_taxonomy.sh ##
 - Downloads the [newst NCBI taxonomy (i.e. new_taxdump)](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/).
