@@ -1,11 +1,38 @@
 Collection of scripts for processing BOLD-downloaded sample metadata, collects other useful sample-related information, and generates input files for downstream processes ([uploading trimmed reads to ENA](https://github.com/bge-barcoding/ena-read-upload), input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and [requesting taxid creation from ENA](https://github.com/bge-barcoding/ena-taxid-creation)). Written by Ben Price and Dan Parsons @ NHMUK.
-
+- For help, see usage information and docstrings within each script.
 
 ## 1_combine_tsv.py ##
 - Merges TSV files from multiple zipped folders downloaded from BOLD.
   - **`usage: python combine_tsv.py <output_dir> <zip_files_dir>`**
   - `output_dir: Directory where combined .tsv files will be stored.`
-  - `zip_files_dir: Directory containing the zipped files to be merged.`
+  - `zip_files_dir: Directory containing the zipped files to be merged.
+    - Recommended directory structure:parent_directory/
+```├── parent_file1.txt
+├── collection_data.tsv
+├── lab.tsv
+├── merged_custom_fields.tsv
+├── specimen_details.tsv
+├── tags.tsv
+├── taxonomy.tsv
+├── voucher.tsv
+│
+├── subdirectory.zip
+│   ├── collection_data.tsv
+│   ├── lab.tsv
+│   ├── merged_custom_fields.tsv
+│   ├── specimen_details.tsv
+│   ├── tags.tsv
+│   ├── taxonomy.tsv
+│   └── voucher.tsv
+│
+└── subdirectory2.zip
+    ├──  collection_data.tsv
+    ├── lab.tsv
+    ├── merged_custom_fields.tsv
+    ├── specimen_details.tsv
+    ├── tags.tsv
+    ├── taxonomy.tsv
+    └── voucher.tsv````
  
 ## 2_download_taxonomy.sh ##
 - Downloads the [newst NCBI taxonomy (i.e. new_taxdump)](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/).
