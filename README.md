@@ -6,8 +6,8 @@ Collection of scripts for processing BOLD-downloaded sample metadata, collects o
   - **`usage: python combine_tsv.py <output_dir> <zip_files_dir>`**
   - `output_dir: Directory where combined .tsv files will be stored.`
   - `zip_files_dir: Directory containing the zipped files to be merged.
-    - Recommended directory structure:parent_directory/
-```├── parent_file1.txt
+    - Recommended directory structure:
+```├── parent_directory/
 ├── collection_data.tsv
 ├── lab.tsv
 ├── merged_custom_fields.tsv
