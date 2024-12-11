@@ -75,7 +75,7 @@ Script to generate samples.csv requried to run MGE and skim2mito piplines. Scrip
 - **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
 **- `path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.`
 - `path/to/output/dir/samples_metadata.csv`: Directory containing sample_metadta.csv file.`
-- outputs three CSV files containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory.
+- outputs three CSV files containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory. samples_[parent_dir_name]_types.csv also contains type_status field for reference.
   - samples_[parent_dir_name].csv = contains all samples containing BGE project codes in their Process ID's.
   - samples_[parent_dir_name]_nonproject.csv = contains all samples not containing BGE project codes.
   - samples_[parent_dir_name]_types.csv = contains all samples (project or non-project) that have 'type' in Type Status field.
