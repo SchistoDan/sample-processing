@@ -74,12 +74,28 @@ If metadata was not collected for a particular sample, 'not collected' output to
 ## 4_samples_spreadsheet.py ##
 Script to generate samples.csv requried to run MGE and skim2mito piplines. Script also screen BGE project samples using the 27 BGE project codes.
 - **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
-- `path/to/raw/read/dir: Path to parent directory with 'flat' or 'nested' structure (see docstring in script for more info) containing raw PE read files.`
+- `path/to/raw/read/dir: Path to parent directory with 'flat' or 'nested' structure (see below/docstring for more example) containing raw PE read files.`
 - `path/to/output/dir/samples_metadata.csv`: Directory containing sample_metadata.csv file.`
 - outputs three CSV files containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory. samples_[parent_dir_name]_types.csv also contains type_status field, for reference.
   - samples_[parent_dir_name].csv = contains all samples containing BGE project codes in their Process ID's.
   - samples_[parent_dir_name]_nonproject.csv = contains all samples not containing BGE project codes.
   - samples_[parent_dir_name]_types.csv = contains all samples (project or non-project) that have 'type' in Type Status field.
+```
+Example Directory Structures Supported (where BSNHM593-24 is the process ID):
+1. Flat structure:
+   /parent_dir/
+   ├── BSNHM593-24_R1.fq
+   ├── BSNHM593-24_R2.fq
+   └── ...
+
+2. Nested structure:
+   /parent_dir/XE-4013/
+   └── 20240906_LH00179_0123_A22CKGHLT4/
+       ├── Sample_XE-4013-BSNHM593-24/
+       │   ├── BSNHM593-24_R1.fastq.gz
+       │   └── BSNHM593-24_R2.fastq.gz
+       └── ...
+```
 
 ## Miro workflow ##
 ![image](![image](https://github.com/user-attachments/assets/dd960f04-2957-4ef1-bd58-d5457ecba777)
