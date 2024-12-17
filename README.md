@@ -1,4 +1,5 @@
-Collection of scripts for processing BOLD-downloaded sample metadata, collects other useful sample-related information, and generates input files for downstream processes ([uploading trimmed reads to ENA](https://github.com/bge-barcoding/ena-read-upload), input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and [requesting taxid creation from ENA](https://github.com/bge-barcoding/ena-taxid-creation)). Written by Ben Price and Dan Parsons @ NHMUK.
+Collection of scripts for processing and parsing necessary BOLD-downloaded sample metadata, and generating input files for downstream processes (e.g. ([uploading trimmed reads to ENA](https://github.com/bge-barcoding/ena-read-upload), input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and [requesting taxid creation from ENA](https://github.com/bge-barcoding/ena-taxid-creation))). 
+- Written by Ben Price and Dan Parsons @ NHMUK.
 - For help, see usage information and docstrings within each script.
 
 ## 1_combine_tsv.py ##
@@ -73,9 +74,9 @@ If metadata was not collected for a particular sample, 'not collected' output to
 ## 4_samples_spreadsheet.py ##
 Script to generate samples.csv requried to run MGE and skim2mito piplines. Script also screen BGE project samples using the 27 BGE project codes.
 - **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
-**- `path/to/raw/read/dir: Path to parent directory of subdirectories containing raw PE read files.`
-- `path/to/output/dir/samples_metadata.csv`: Directory containing sample_metadta.csv file.`
-- outputs three CSV files containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory. samples_[parent_dir_name]_types.csv also contains type_status field for reference.
+- `path/to/raw/read/dir: Path to parent directory with 'flat' or 'nested' structure (see docstring in script for more info) containing raw PE read files.`
+- `path/to/output/dir/samples_metadata.csv`: Directory containing sample_metadata.csv file.`
+- outputs three CSV files containing ID (Process ID), forward (absolute path to R1 read (fastq.gz), reverse (absolute path to R2 read (fastq.gz) and taxid to current directory. samples_[parent_dir_name]_types.csv also contains type_status field, for reference.
   - samples_[parent_dir_name].csv = contains all samples containing BGE project codes in their Process ID's.
   - samples_[parent_dir_name]_nonproject.csv = contains all samples not containing BGE project codes.
   - samples_[parent_dir_name]_types.csv = contains all samples (project or non-project) that have 'type' in Type Status field.
