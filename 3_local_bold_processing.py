@@ -1,12 +1,12 @@
 """
 Sample Metadata Generator for Taxonomic Data
 
-This script processes taxonomic and specimen data from multiple TSV files to generate
+This script processes taxonomic and specimen data from multiple tsv files to generate
 consolidated sample metadata. It handles taxonomic classification, geographic information,
 collection details, and specimen characteristics.
 
 Key Features:
-- Processes multiple TSV input files (voucher, collection, specimen, taxonomy, lab, custom fields)
+- Processes multiple tsv input files (voucher, collection, specimen, taxonomy, lab, custom fields)
 - Resolves taxonomic IDs using a ranked lineage reference file
 - Handles missing data with standardised 'not collected' values
 - Standardises date formats
@@ -29,9 +29,9 @@ Usage:
     python 3_local_bold_processing.py <input_directory> <rankedlineage_path> <output_directory>
 
 Arguments:
-    input_directory: Directory containing all required TSV files
+    input_directory: Directory containing all required tsv files
     rankedlineage_path: Path to the rankedlineage.dmp file
-    output_directory: Directory where the output CSV will be saved
+    output_directory: Directory where the output csv will be saved
 
 Dependencies:
     - pandas
@@ -58,147 +58,198 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
 
-def determine_rank(parts):
+def load_rankedlineage(rankedlineage_path):
     """
-    Determine the rank of a tax_name based on which column first contains data
-    parts[1] = tax_name
-    parts[2] = species
-    parts[3] = genus
-    parts[4] = family
-    parts[5] = order
-    parts[6] = class
-    parts[7] = phylum
-    parts[8] = kingdom
-    parts[9] = superkingdom
-    """
-    if parts[2].strip():  # If species column has data
-        return 'subspecies'
+    Load taxonomic data with comprehensive indexing at all taxonomic ranks
+    and improved species name handling
     
-    rank_map = {
-        3: 'species',
-        4: 'genus',
-        5: 'family',
-        6: 'order',
-        7: 'class',
-        8: 'phylum',
-        9: 'kingdom',
-        10: 'superkingdom'
+    Parameters:
+    rankedlineage_path (str): Path to the rankedlineage.dmp file
+    
+    Returns:
+    dict: Dictionary containing indexed taxonomic data at all ranks
+    """
+    print(f"Loading rankedlineage file from {rankedlineage_path}...")
+    
+    tax_data = {
+        'by_scientific_name': {},
+        'by_species': {},
+        'by_genus': {},
+        'by_family': {},
+        'by_order': {},
+        'by_class': {},
+        'by_phylum': {}
     }
     
-    for idx, value in enumerate(parts[3:], start=3):
-        if value.strip():
-            return rank_map.get(idx, 'unknown')
+    line_count = 0
+    species_indexed = 0
     
-    return 'unknown'
-
-def validate_higher_ranks(lineage, target_ranks):
-    """
-    Validate if lineage matches higher taxonomic ranks
-    Returns True if all available ranks match
-    """
-    rank_order = ['phylum', 'class', 'order', 'family', 'genus', 'species']
-    
-    for rank in rank_order:
-        if lineage.get(rank) and target_ranks.get(rank):
-            if lineage[rank].lower() != target_ranks[rank].lower():
-                return False
-    return True
-
-def find_best_match(matches, target_ranks):
-    """
-    From multiple matches, find the one that best matches higher ranks
-    """
-    best_match = None
-    best_match_score = -1
-    
-    rank_order = ['phylum', 'class', 'order', 'family', 'genus', 'species']
-    
-    for match in matches:
-        score = 0
-        for rank in rank_order:
-            if match.get(rank) and target_ranks.get(rank):
-                if match[rank].lower() == target_ranks[rank].lower():
-                    score += 1
+    with open(rankedlineage_path, 'r', encoding='utf-8', errors='ignore') as file:
+        for line in file:
+            parts = [p.strip() for p in line.strip().split('|')]
+            if len(parts) < 10:
+                continue
+                
+            taxid = parts[0]
+            scientific_name = parts[1]
+            species_field = parts[2]
+            genus = parts[3]
+            family = parts[4]
+            order = parts[5]
+            class_name = parts[6]
+            phylum = parts[7]
+            kingdom = parts[8]
+            superkingdom = parts[9]
+            
+            # Extract species without duplicating genus
+            species = None
+            if species_field:
+                # Remove genus if it's at the start of species field
+                if genus and species_field.lower().startswith(genus.lower()):
+                    species = species_field[len(genus):].strip()
                 else:
-                    # Penalise mismatches at lower ranks more heavily
-                    score -= (len(rank_order) - rank_order.index(rank))
-        
-        if score > best_match_score:
-            best_match_score = score
-            best_match = match
-    
-    return best_match if best_match_score >= 0 else None
-
-def search_by_rank(search_term, rank, tax_tree, target_ranks):
-    """
-    Search for a term at a specific rank, validating against higher ranks
-    Returns (taxid, matched_rank, lineage) or (None, None, None)
-    """
-    matches = []
-    
-    # Search in the specific rank category if it exists
-    if rank in tax_tree:
-        for tax_name, lineage in tax_tree[rank].items():
-            if tax_name.lower() == search_term.lower():
-                matches.append(lineage)
-    
-    # If we found matches, validate against higher ranks
-    if matches:
-        best_match = find_best_match(matches, target_ranks)
-        if best_match:
-            return best_match['taxid'], rank, best_match
-    
-    return None, None, None
-
-def fetch_taxid_from_local(genus, species, tax_tree, target_ranks):
-    """
-    Attempt to find taxid with hierarchical fallback and validation
-    """
-    # First try species-level match if species is provided
-    if species:
-        # Try exact species match under the specified genus
-        if genus in tax_tree:
-            genus_data = tax_tree[genus]
-            species_matches = []
+                    species = species_field
+            elif genus and scientific_name.startswith(genus):
+                species = scientific_name[len(genus):].strip()
+                
+            # Validate species name
+            if species and any(x in species.lower() for x in ['sp.', 'cf.', 'aff.', 'x ', 'subsp.', 'var.']):
+                species = None
             
-            # Check direct species entries
-            for tax_name, lineage in genus_data.items():
-                if isinstance(lineage, dict) and not 'subspecies' in lineage:
-                    if tax_name.lower() == species.lower():
-                        species_matches.append(lineage)
+            lineage = {
+                'taxid': taxid,
+                'scientific_name': scientific_name,
+                'species': species,
+                'genus': genus,
+                'family': family,
+                'order': order,
+                'class': class_name,
+                'phylum': phylum,
+                'kingdom': kingdom,
+                'superkingdom': superkingdom
+            }
             
-            # Check subspecies entries
-            for species_entry in genus_data.values():
-                if isinstance(species_entry, dict) and 'subspecies' in species_entry:
-                    for subspecies_data in species_entry['subspecies'].values():
-                        if subspecies_data['species'].lower() == species.lower():
-                            species_matches.append(subspecies_data)
+            # Index by scientific name
+            tax_data['by_scientific_name'][scientific_name.lower()] = lineage
             
-            if species_matches:
-                best_match = find_best_match(species_matches, target_ranks)
-                if best_match:
-                    return best_match['taxid'], 'species', best_match
+            # Index by species if we have it - store without duplicating genus
+            if species and genus:
+                species_key = f"{genus.lower()} {species.lower()}"
+                tax_data['by_species'][species_key] = lineage
+                species_indexed += 1
+            
+            # Index by genus
+            if genus:
+                if genus.lower() not in tax_data['by_genus']:
+                    tax_data['by_genus'][genus.lower()] = []
+                tax_data['by_genus'][genus.lower()].append(lineage)
+            
+            # Index by family
+            if family:
+                if family.lower() not in tax_data['by_family']:
+                    tax_data['by_family'][family.lower()] = []
+                tax_data['by_family'][family.lower()].append(lineage)
+            
+            # Index by order
+            if order:
+                if order.lower() not in tax_data['by_order']:
+                    tax_data['by_order'][order.lower()] = []
+                tax_data['by_order'][order.lower()].append(lineage)
+            
+            # Index by class
+            if class_name:
+                if class_name.lower() not in tax_data['by_class']:
+                    tax_data['by_class'][class_name.lower()] = []
+                tax_data['by_class'][class_name.lower()].append(lineage)
+            
+            # Index by phylum
+            if phylum:
+                if phylum.lower() not in tax_data['by_phylum']:
+                    tax_data['by_phylum'][phylum.lower()] = []
+                tax_data['by_phylum'][phylum.lower()].append(lineage)
+            
+            line_count += 1
+            if line_count % 500000 == 0:
+                print(f"Processed {line_count} lines... ({species_indexed} species indexed)")
+                print(f"Current index sizes:")
+                print(f"  Scientific names: {len(tax_data['by_scientific_name'])}")
+                print(f"  Species: {len(tax_data['by_species'])}")
+                print(f"  Genera: {len(tax_data['by_genus'])}")
+                print(f"  Families: {len(tax_data['by_family'])}")
+                print(f"  Orders: {len(tax_data['by_order'])}")
+                print(f"  Classes: {len(tax_data['by_class'])}")
+                print(f"  Phyla: {len(tax_data['by_phylum'])}")
     
-    # Try searching at each rank level with validation
-    search_ranks = [
-        ('genus', genus),
-        ('family', target_ranks.get('family')),
-        ('order', target_ranks.get('order')),
-        ('class', target_ranks.get('class')),
-        ('phylum', target_ranks.get('phylum'))
-    ]
+    print(f"\nFinished loading {line_count} taxonomic records.")
+    print(f"Final index sizes:")
+    print(f"  Scientific names: {len(tax_data['by_scientific_name'])}")
+    print(f"  Species: {len(tax_data['by_species'])}")
+    print(f"  Genera: {len(tax_data['by_genus'])}")
+    print(f"  Families: {len(tax_data['by_family'])}")
+    print(f"  Orders: {len(tax_data['by_order'])}")
+    print(f"  Classes: {len(tax_data['by_class'])}")
+    print(f"  Phyla: {len(tax_data['by_phylum'])}")
     
-    for rank, search_term in search_ranks:
-        if search_term:  # Only search if we have a term to search for
-            taxid, matched_rank, lineage = search_by_rank(search_term, rank, tax_tree, target_ranks)
-            if taxid:
-                return taxid, matched_rank, lineage
-    
-    return None, 'unmatched', None
+    return tax_data
 
-def resolve_taxid(phylum, class_name, order, family, genus, species, tax_tree):
+def validate_against_higher_ranks(lineage, target_ranks, validation_level='family'):
     """
-    Resolve taxonomic ID with hierarchical fallback and lineage retrieval
+    Validate taxonomy with hierarchical fallback at different taxonomic levels.
+    Returns true if a match is found at the specified level, without checking lower ranks.
+    
+    Parameters:
+    lineage (dict): The lineage to validate
+    target_ranks (dict): The target taxonomy to validate against
+    validation_level (str): The taxonomic level to validate at ('family', 'order', 'class', or 'phylum')
+    
+    Returns:
+    bool: True if validation passes at the specified level
+    """
+    print(f"\nValidating at {validation_level} level")
+    
+    # Define validation hierarchy (from lowest to highest rank)
+    validation_ranks = {
+        'family': ['family'],
+        'order': ['order'],
+        'class': ['class'],
+        'phylum': ['phylum']
+    }
+    
+    ranks_to_check = validation_ranks.get(validation_level, [])
+    print(f"Checking ranks: {ranks_to_check}")
+    
+    # Only check the specified rank, not lower ranks
+    for rank in ranks_to_check:
+        if target_ranks.get(rank) and lineage.get(rank):
+            target_value = target_ranks[rank].lower()
+            lineage_value = lineage[rank].lower()
+            print(f"Comparing {rank}: {lineage_value} vs {target_value}")
+            
+            if lineage_value == target_value:
+                print(f"âœ“ Direct match at {rank}")
+                return True
+            
+            print(f"âœ— Mismatch at {rank}")
+            return False
+            
+    return False
+
+def resolve_taxid(phylum, class_name, order, family, genus, species, tax_data):
+    """
+    Resolve taxonomic ID with hierarchical fallback and validation.
+    Tries to match at each rank level and validates against higher ranks in order.
+    
+    Parameters:
+    phylum (str): Phylum name
+    class_name (str): Class name
+    order (str): Order name
+    family (str): Family name
+    genus (str): Genus name
+    species (str): Species name
+    tax_data (dict): The taxonomic data dictionary from load_rankedlineage
+    
+    Returns:
+    tuple: (taxid, matched_rank, lineage_string, is_mismatch)
     """
     target_ranks = {
         'phylum': phylum,
@@ -209,65 +260,65 @@ def resolve_taxid(phylum, class_name, order, family, genus, species, tax_tree):
         'species': species
     }
     
-    taxid, matched_rank, lineage = fetch_taxid_from_local(genus, species, tax_tree, target_ranks)
+    validation_levels = ['family', 'order', 'class', 'phylum']
+    print(f"\n==========: Looking up: {genus} {species} :==========")
+    print(f"Input taxonomy: {target_ranks}")
     
-    if not taxid:
-        return None, 'unmatched', None, False
-    
-    # Create lineage string
-    lineage_string = ";".join([f"{rank}:{lineage.get(rank, '')}" for rank in ['superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']])
-    
-    # Verify the match is consistent with provided higher taxonomy
-    if lineage and not validate_higher_ranks(lineage, target_ranks):
-        return taxid, matched_rank, lineage_string, True
-    
-    return taxid, matched_rank, lineage_string, False
-
-def load_rankedlineage(rankedlineage_path):
-    print(f"Loading rankedlineage file from {rankedlineage_path}...")
-    tax_tree = {}
-    line_count = 0
-    
-    with open(rankedlineage_path, 'r', encoding='utf-8', errors='ignore') as file:
-        for line in file:
-            parts = [p.strip() for p in line.strip().split('|')]
-            taxid = parts[0]
-            tax_name = parts[1]
-            rank = determine_rank(parts)
+    # Try species-level match first
+    if species and genus:
+        # Remove genus from species if it's duplicated at the start
+        species_name = species
+        if species.lower().startswith(genus.lower()):
+            species_name = species[len(genus):].strip()
             
-            lineage = {
-                'taxid': taxid,
-                'tax_name': tax_name,
-                'rank': rank,
-                'species': parts[2] if parts[2].strip() else None,
-                'genus': parts[3] if parts[3].strip() else None,
-                'family': parts[4] if parts[4].strip() else None,
-                'order': parts[5] if parts[5].strip() else None,
-                'class': parts[6] if parts[6].strip() else None,
-                'phylum': parts[7] if parts[7].strip() else None,
-                'kingdom': parts[8] if parts[8].strip() else None,
-                'superkingdom': parts[9] if parts[9].strip() else None
-            }
-            
-            # Build tree structure based on available data
-            if rank == 'subspecies':
-                genus = parts[3]
-                species_name = parts[2]
-                tax_tree.setdefault(genus, {}).setdefault(species_name, {})['subspecies'] = {
-                    tax_name: lineage
-                }
-            elif rank == 'species':
-                genus = parts[3]
-                tax_tree.setdefault(genus, {})[tax_name] = lineage
+        species_key = f"{genus.lower()} {species_name.lower()}"
+        print(f"Trying species lookup with key: {species_key}")
+        if species_key in tax_data['by_species']:
+            print("Found species match")
+            lineage = tax_data['by_species'][species_key]
+            for level in validation_levels:
+                if validate_against_higher_ranks(lineage, target_ranks, level):
+                    return create_return_tuple(lineage, 'species', False)
+    
+    # Try genus-level match
+    if genus:
+        print(f"Trying genus-level match for: {genus}")
+        if genus.lower() in tax_data['by_genus']:
+            matches = tax_data['by_genus'][genus.lower()]
+            print(f"Found {len(matches)} genus matches")
+            for lineage in matches:
+                # For genus match, try validating at each level in order
+                for level in validation_levels:
+                    if validate_against_higher_ranks(lineage, target_ranks, level):
+                        return create_return_tuple(lineage, 'genus', False)
+        else:
+            print("No genus matches found")
+    
+    # Try matches at each higher rank
+    for rank in validation_levels:
+        rank_value = target_ranks.get(rank)
+        if rank_value:
+            print(f"Trying {rank}-level match for: {rank_value}")
+            if rank_value.lower() in tax_data[f'by_{rank}']:
+                matches = tax_data[f'by_{rank}'][rank_value.lower()]
+                print(f"Found {len(matches)} {rank} matches")
+                # For each rank, only validate at that specific rank
+                for lineage in matches:
+                    if validate_against_higher_ranks(lineage, target_ranks, rank):
+                        return create_return_tuple(lineage, rank, False)
             else:
-                tax_tree.setdefault(rank, {})[tax_name] = lineage
-            
-            line_count += 1
-            if line_count % 500000 == 0:
-                print(f"Processed {line_count} lines from rankedlineage.dmp...")
+                print(f"No {rank} matches found")
     
-    print(f"Finished loading rankedlineage.dmp ({line_count} lines processed).")
-    return tax_tree
+    print("No valid matches found at any rank")
+    return None, 'unmatched', None, False
+
+def create_return_tuple(lineage, matched_rank, is_mismatch):
+    """Helper function to create consistent return values"""
+    lineage_string = ";".join([
+        f"{rank}:{lineage.get(rank, '')}" 
+        for rank in ['superkingdom', 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+    ])
+    return lineage['taxid'], matched_rank, lineage_string, is_mismatch
 
 def locate_files_in_directory(directory):
     """
