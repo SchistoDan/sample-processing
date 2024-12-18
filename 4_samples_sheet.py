@@ -61,17 +61,17 @@ Required Metadata CSV Columns:
 Example Directory Structures Supported:
 1. Flat structure:
    /parent_dir/
-   ├── BSNHM593-24_R1.fq
-   ├── BSNHM593-24_R2.fq
-   └── ...
+   â”œâ”€â”€ BSNHM593-24_R1.fq
+   â”œâ”€â”€ BSNHM593-24_R2.fq
+   â””â”€â”€ ...
 
 2. Nested structure:
    /parent_dir/XE-4013/
-   └── 20240906_LH00179_0123_A22CKGHLT4/
-       ├── Sample_XE-4013-BGSNL096-23/
-       │   ├── BGSNL096-23_R1.fastq.gz
-       │   └── BGSNL096-23_R2.fastq.gz
-       └── ...
+   â””â”€â”€ 20240906_LH00179_0123_A22CKGHLT4/
+       â”œâ”€â”€ Sample_XE-4013-BGSNL096-23/
+       â”‚   â”œâ”€â”€ BGSNL096-23_R1.fastq.gz
+       â”‚   â””â”€â”€ BGSNL096-23_R2.fastq.gz
+       â””â”€â”€ ...
 
 Dependencies:
     - Python 3.x
