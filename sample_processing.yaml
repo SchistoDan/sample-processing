@@ -1,0 +1,13 @@
+name: sample_processing
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - mamba
+  - pip
+  - python
+  - wget
+  - pip:
+      - numpy
+      - pandas
+      - tqdm
