@@ -40,10 +40,9 @@ parent_directory/
 ## 2_download_taxonomy.sh ##
 - Downloads the [newst NCBI taxonomy (i.e. new_taxdump)](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/new_taxdump/).
 - If the taxdump was previously downloaded to the same directory, the script will replace that taxdump with the newst version. The tar.gz download will also be removed post-extraction.
-  - **`usage: bash/sbatch/srun download_taxonomy.sh <output_file> <extract_dir>`**
+  - **`usage: srun download_taxonomy.sh <output_file> <extract_dir>`**
   - `output_file = Name of NCBI taxdump (e.g. <date>_taxdump.tar.gz)`
   - `extract_dir = Directory to output taxdump files to (e.g. <date>_taxdump). If given a relative or absolute path, new directories will be created.`
-    - `Script will prompt user (Y/N) to confirm removal of directories, if applicable.`
  
 
 
