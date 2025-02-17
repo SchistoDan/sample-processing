@@ -60,7 +60,7 @@ parent_directory/
 - **`usage: python local_bold_processing.py <input_dir> <rankedlineage_path> <output_dir>`**
   - `input_dir = Directory containing BOLD-downloaded sample metadata (.tsv files).`
   - `rankedlineage_path = Path to NCBI taxonomic hierarchy/lineage (<date>_taxdump/rankedlineage.dmp file).`
-  - `output_dir = Directory to output sample_metadata.tsv to.`
+  - `output = Directory to output sample_metadata.csv to. Provide name of output .csv file`
  
 If metadata was not collected for a particular sample, 'not collected' output to field as required by [ToL ENA sample registration checklist](https://www.ebi.ac.uk/ena/browser/view/ERC000053).
 
@@ -70,7 +70,9 @@ If metadata was not collected for a particular sample, 'not collected' output to
 | BGE_0001_A01  | BSNHM001-24 | Arthropoda | Insecta | Trichoptera | Apataniidae | Apataniinae | Apatania | Apatania stylata | 177658 | genus | 'Museum ID' | adult | YYYY-MM-DD | France | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | NHMMUK | Whole | M | type |
 | BGE_0001_A02 | BSNHM002-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Agapetinae | Agapetus | Agapetus iridipennis | 177627 | genus | 'Museum ID' | adult | YYYY-MM-DD | Switzerland | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | Naturalis | not collected | F | Paratype |
 | BGE_0001_A03 | BSNHM003-24 | Arthropoda | Insecta | Trichoptera | Glossosomatidae | Hydropsychidae | Diplectrona | Diplectrona meridionalis | 177860 | genus | 'Museum ID' | adult | YYYY-MM-DD |  France | not collected | lat (DD) | lon (DD) | 'Collectors' | not collected | not collected | NHMMUK | Leg | M | no |
- 
+
+- This can also be run using the 3_local_bold_proccessing.sh script in this repo to run it on a slurm cluster. This will greatly speed up creation of the sample_metadata.csv output file.
+
 ## 4_samples_spreadsheet.py ##
 Script to generate samples.csv requried to run MGE and skim2mito piplines. Script also screen BGE project samples using the 27 BGE project codes.
 - **`usage: python 2_samples_spreadsheet.py [path/to/raw/read/dir] [path/to/samples_metadata.csv]`**
