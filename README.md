@@ -1,6 +1,7 @@
 Collection of scripts for processing and parsing necessary BOLD-downloaded sample metadata, and generating input files for downstream processes (e.g. ([uploading trimmed reads to ENA](https://github.com/bge-barcoding/ena-read-upload), input into [skim2mito](https://github.com/o-william-white/skim2mito) and [MGE](https://github.com/bge-barcoding/MitoGeneExtractor-BGE), and [requesting taxid creation from ENA](https://github.com/bge-barcoding/ena-taxid-creation))). 
 - Written by Ben Price and Dan Parsons @ NHMUK.
 - For help, see usage information and docstrings within each script.
+- Requires sample_processing conda environment to be activated. Environment with all necessary dependencies can be created from sample_processing.yaml file in this repo.
 
 ## 1_combine_tsv.py ##
 - Merges TSV files from multiple zipped folders downloaded from BOLD.
